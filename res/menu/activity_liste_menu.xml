@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/refresh"
+        android:icon="@drawable/ic_menu_refresh"
+        android:onClick="refreshClicked"
+        android:showAsAction="ifRoom|withText"
+        android:title="Rafraîchir">
+    </item>
+    
+    <item
+        android:id="@+id/clear"
+        android:icon="@drawable/icon48x48_2"
+        android:onClick="clearClicked"
+        android:showAsAction="ifRoom|withText"
+        android:title="Clear">
+    </item>
+
+</menu>
