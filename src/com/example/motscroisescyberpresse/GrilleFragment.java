@@ -1,13 +1,6 @@
 package com.example.motscroisescyberpresse;
 
-import java.sql.RowIdLifetime;
-
-import javax.xml.datatype.Duration;
-
-import com.example.motscroisescyberpresse.CaseView.DirectionActive;
-
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -18,13 +11,14 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.GridLayout;
 import android.widget.GridLayout.LayoutParams;
 import android.widget.GridLayout.Spec;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.example.motscroisescyberpresse.CaseView.DirectionActive;
 
 public class GrilleFragment extends Fragment implements OnClickListener {
 	private ViewGroup container;
@@ -38,6 +32,10 @@ public class GrilleFragment extends Fragment implements OnClickListener {
 	public void setArguments(Bundle args) {
 		grille = (Grille) args.getSerializable("grille");
 	}
+
+	public Grille getGrille() {
+		return grille;
+	};
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -120,8 +118,9 @@ public class GrilleFragment extends Fragment implements OnClickListener {
 		caseActive = (CaseView) v;
 		caseActive.setCaseActive(true);
 		boolean requestFocus = caseActive.requestFocus();
-		Log.e("grille", "rf = " + requestFocus + " focusable = "
-				+ caseActive.isFocusable());
+		Log.e("grille",
+				"rf = " + requestFocus + " focusable = "
+						+ caseActive.isFocusable());
 	}
 
 	public void prochaineCaseActive() {
@@ -132,7 +131,8 @@ public class GrilleFragment extends Fragment implements OnClickListener {
 		CaseView c;
 		if (directionActive == DirectionActive.DROITE) {
 			while (true) {
-				absPos = (absPos + 1) % (grille.getTailleX() * grille.getTailleY());
+				absPos = (absPos + 1)
+						% (grille.getTailleX() * grille.getTailleY());
 				c = (CaseView) grilleLayout.getChildAt(absPos);
 				if (!c.isPleine()) {
 					break;
@@ -142,7 +142,8 @@ public class GrilleFragment extends Fragment implements OnClickListener {
 			c.setDirectionActive(DirectionActive.DROITE);
 		} else {
 			while (true) {
-				absPos = (absPos + 12) % (grille.getTailleX() * grille.getTailleY());
+				absPos = (absPos + 12)
+						% (grille.getTailleX() * grille.getTailleY());
 				c = (CaseView) grilleLayout.getChildAt(absPos);
 				if (!c.isPleine()) {
 					break;
@@ -151,8 +152,38 @@ public class GrilleFragment extends Fragment implements OnClickListener {
 			onClick(c);
 			c.setDirectionActive(DirectionActive.BAS);
 		}
-		
-		
+	}
+
+	public void precedenteCaseActive() {
+		DirectionActive directionActive = caseActive.getDirectionActive();
+		int x = caseActive.getPosX();
+		int y = caseActive.getPosY();
+		int absPos = y * grille.getTailleX() + x;
+		CaseView c;
+		if (directionActive == DirectionActive.DROITE) {
+			while (true) {
+				absPos = (absPos + grille.getTailleX() * grille.getTailleY() - 1)
+						% (grille.getTailleX() * grille.getTailleY());
+				c = (CaseView) grilleLayout.getChildAt(absPos);
+				if (!c.isPleine()) {
+					break;
+				}
+			}
+			onClick(c);
+			c.setDirectionActive(DirectionActive.DROITE);
+		} else {
+			while (true) {
+				absPos = (absPos + (grille.getTailleX() * grille.getTailleY() - grille
+						.getTailleX()))
+						% (grille.getTailleX() * grille.getTailleY());
+				c = (CaseView) grilleLayout.getChildAt(absPos);
+				if (!c.isPleine()) {
+					break;
+				}
+			}
+			onClick(c);
+			c.setDirectionActive(DirectionActive.BAS);
+		}
 	}
 
 	public void ouvrirClavierClicked(View v) {
@@ -185,14 +216,29 @@ public class GrilleFragment extends Fragment implements OnClickListener {
 			if (keyCode == KeyEvent.KEYCODE_BACK) {
 				return false;
 			}
+
+			if (caseActive == null) {
+				return true;
+			}
+
 			// On assume que les keycodes se suivent...
 			if (keyCode >= KeyEvent.KEYCODE_A && keyCode <= KeyEvent.KEYCODE_Z) {
 				keyCode -= KeyEvent.KEYCODE_A;
 				int c = 'A' + keyCode;
 
 				caseActive.setText("" + (char) c);
+				grille.setCharUser(caseActive.getPosX(), caseActive.getPosY(),
+						(char) c);
 				prochaineCaseActive();
 			}
+
+			if (keyCode == KeyEvent.KEYCODE_DEL) {
+				precedenteCaseActive();
+				caseActive.setText(" ");
+				grille.setCharUser(caseActive.getPosX(), caseActive.getPosY(),
+						' ');
+			}
+
 			return true;
 		}
 

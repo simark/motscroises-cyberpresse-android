@@ -2,12 +2,7 @@ package com.example.motscroisescyberpresse;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.text.Editable;
-import android.text.method.KeyListener;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.View;
 import android.widget.TextView;
 
 public class CaseView extends TextView {

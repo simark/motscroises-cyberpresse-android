@@ -18,6 +18,7 @@
         <activity
             android:name="com.example.motscroisescyberpresse.GrilleActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.NoActionBar"
             android:windowSoftInputMode="adjustResize" >
         </activity>

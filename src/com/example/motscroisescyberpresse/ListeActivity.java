@@ -1,11 +1,10 @@
 package com.example.motscroisescyberpresse;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.app.Activity;
@@ -13,7 +12,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,15 +31,13 @@ public class ListeActivity extends Activity implements FetchCallback,
 		OnItemClickListener {
 	ProgressDialog mProgressDialog;
 
-	List<Grille> grilles = new ArrayList<Grille>();
+	List<Grille> grilles = new ArrayList<Grille>();;
 	ListView listeViewGrilles;
 	ListeGrillesAdapter listeViewGrillesAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		loadListeFromStorage();
 
 		this.setContentView(R.layout.activity_liste);
 
@@ -68,6 +64,22 @@ public class ListeActivity extends Activity implements FetchCallback,
 		return true;
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		try {
+			List<Grille> nouvellesGrilles = GrilleStorage.loadListeFromStorage(this);
+			grilles.clear();
+			grilles.addAll(nouvellesGrilles);
+			listeViewGrillesAdapter.notifyDataSetChanged();
+		} catch (Exception e) {
+			Toast.makeText(this,
+					"Erreur lors du chargement des grilles locales.",
+					Toast.LENGTH_LONG).show();
+		}
+	}
+
 	public void refreshClicked(MenuItem v) {
 		mProgressDialog.setProgress(0);
 		mProgressDialog.show();
@@ -77,7 +89,13 @@ public class ListeActivity extends Activity implements FetchCallback,
 
 	public void clearClicked(MenuItem v) {
 		grilles.clear();
-		saveListeToStorage();
+		try {
+			GrilleStorage.saveListeToStorage(this, grilles);
+		} catch (IOException e) {
+			Toast.makeText(this,
+					"Erreur lors de la sauvegarde de la liste de grilles.",
+					Toast.LENGTH_LONG).show();
+		}
 		listeViewGrillesAdapter.notifyDataSetChanged();
 	}
 
@@ -100,7 +118,23 @@ public class ListeActivity extends Activity implements FetchCallback,
 			addNewGrille(g);
 		}
 
-		saveListeToStorage();
+		Collections.sort(grilles, new Comparator<Grille>() {
+
+			@Override
+			public int compare(Grille lhs, Grille rhs) {
+				return (int) (lhs.getDateRecuperee().getTime() - rhs
+						.getDateRecuperee().getTime());
+			}
+		});
+
+		try {
+			GrilleStorage.saveListeToStorage(this, grilles);
+		} catch (IOException e) {
+			Toast.makeText(this,
+					"Erreur lors de la sauvegarde de la liste de grilles.",
+					Toast.LENGTH_LONG).show();
+		}
+
 		listeViewGrillesAdapter.notifyDataSetChanged();
 
 		for (int i = 0; i < errors.size(); i++) {
@@ -119,36 +153,6 @@ public class ListeActivity extends Activity implements FetchCallback,
 		}
 
 		grilles.add(g);
-	}
-
-	private void saveListeToStorage() {
-		Log.i("liste", "Starting save to local storage");
-		try {
-			FileOutputStream out = openFileOutput("grilles", MODE_PRIVATE);
-			ObjectOutputStream oos = new ObjectOutputStream(out);
-			oos.writeObject(grilles);
-		} catch (Exception e) {
-			Toast.makeText(this, "Erreur: " + e.getMessage(), Toast.LENGTH_LONG)
-					.show();
-		}
-
-		Log.i("liste", "Done writing to local storage");
-	}
-
-	@SuppressWarnings("unchecked")
-	private void loadListeFromStorage() {
-		Log.i("liste", "Starting load from local storage");
-		try {
-			FileInputStream in = openFileInput("grilles");
-			ObjectInputStream ois = new ObjectInputStream(in);
-			grilles = ((List<Grille>) ois.readObject());
-		} catch (FileNotFoundException e) {
-			// Si le fichier n'existe pas, too bad.
-		} catch (Exception e) {
-			Toast.makeText(this, "Erreur: " + e.getMessage(), Toast.LENGTH_LONG)
-					.show();
-		}
-		Log.i("liste", "Done load from local storage");
 	}
 
 	@Override

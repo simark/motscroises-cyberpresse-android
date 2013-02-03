@@ -8,13 +8,6 @@
         android:showAsAction="ifRoom|withText"
         android:title="Rafraîchir">
     </item>
-    
-    <item
-        android:id="@+id/clear"
-        android:icon="@drawable/icon48x48_2"
-        android:onClick="clearClicked"
-        android:showAsAction="ifRoom|withText"
-        android:title="Clear">
-    </item>
+    <item android:id="@+id/clear" android:onClick="clearClicked" android:title="Clear"></item>
 
 </menu>

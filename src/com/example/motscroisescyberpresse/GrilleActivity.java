@@ -1,6 +1,9 @@
 package com.example.motscroisescyberpresse;
 
-import android.content.Context;
+import java.io.IOException;
+import java.io.StreamCorruptedException;
+import java.util.List;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,11 +11,11 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 public class GrilleActivity extends FragmentActivity {
@@ -42,23 +45,25 @@ public class GrilleActivity extends FragmentActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
-		
+
 		setContentView(R.layout.activity_grille);
 
 		Intent intent = getIntent();
 		grille = (Grille) intent.getSerializableExtra("grille");
 
-		// Create the adapter that will return a fragment for each of the three
-		// primary sections of the app.
-		mSectionsPagerAdapter = new SectionsPagerAdapter(
-				getSupportFragmentManager());
+		if (savedInstanceState == null) {
+			// Create the adapter that will return a fragment for each of the
+			// three
+			// primary sections of the app.
+			mSectionsPagerAdapter = new SectionsPagerAdapter(
+					getSupportFragmentManager());
 
-		// Set up the ViewPager with the sections adapter.
-		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mViewPager.setAdapter(mSectionsPagerAdapter);
+			// Set up the ViewPager with the sections adapter.
+			mViewPager = (ViewPager) findViewById(R.id.pager);
+			mViewPager.setAdapter(mSectionsPagerAdapter);
 
-		mViewPager.setCurrentItem(1, false);
+			mViewPager.setCurrentItem(1, false);
+		}
 	}
 
 	@Override
@@ -70,6 +75,31 @@ public class GrilleActivity extends FragmentActivity {
 
 	public void ouvrirClavierClicked(View v) {
 		grilleFragment.ouvrirClavierClicked(v);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.i("grille", "onpause");
+		sauverGrille();
+	}
+
+	private void sauverGrille() {
+		grille = grilleFragment.getGrille();
+
+		try {
+			List<Grille> grilles = GrilleStorage.loadListeFromStorage(this);
+			for (int i = 0; i < grilles.size(); i++) {
+				if (grilles.get(i).getGrilleNum() == grille.getGrilleNum()) {
+					grilles.set(i, grille);
+					break;
+				}
+			}
+			GrilleStorage.saveListeToStorage(this, grilles);
+		} catch (Exception e) {
+			Toast.makeText(this, "Erreur lors de la sauvegarde de la grille.",
+					Toast.LENGTH_LONG).show();
+		}
 	}
 
 	/**
@@ -84,9 +114,6 @@ public class GrilleActivity extends FragmentActivity {
 
 		@Override
 		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
-			// Return a DummySectionFragment (defined as a static inner class
-			// below) with the page number as its lone argument.
 			if (position == 1) {
 				grilleFragment = new GrilleFragment();
 				Bundle args = new Bundle();

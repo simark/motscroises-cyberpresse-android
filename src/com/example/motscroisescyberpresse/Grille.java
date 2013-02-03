@@ -1,6 +1,7 @@
 package com.example.motscroisescyberpresse;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -21,6 +22,7 @@ public class Grille implements Serializable {
 	private final String[] vertical;
 	private final int tailleY;
 	private final int tailleX;
+	private Date dateRecuperee = new Date(0);
 
 	public Grille(char[][] reponse, int tailleX, int tailleY, String[] horizontal, String[] vertical) {
 		this.reponse = reponse;
@@ -55,6 +57,10 @@ public class Grille implements Serializable {
 		return contenuUser[x][y];
 	}
 	
+	public void setCharUser(int x, int y, char c) {
+		contenuUser[x][y] = c;
+	}
+	
 	public char getCharReponse(int x, int y) {
 		return reponse[x][y];
 	}
@@ -65,6 +71,14 @@ public class Grille implements Serializable {
 	
 	public int getTailleY() {
 		return tailleY;
+	}
+	
+	public void setDateRecuperee(Date dateRecuperee) {
+		this.dateRecuperee = dateRecuperee;
+	}
+	
+	public Date getDateRecuperee() {
+		return dateRecuperee;
 	}
 
 	public static Grille grilleFromServer(String encoded)

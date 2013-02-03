@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -12,6 +13,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import android.os.AsyncTask;
 import android.util.SparseArray;
@@ -57,18 +59,16 @@ public class FetchThread extends AsyncTask<URL, Integer, List<Grille>> {
 
 		HttpGet get = new HttpGet(URL_GRILLES + n);
 		HttpResponse response = client.execute(get);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				response.getEntity().getContent()));
-
-		line = reader.readLine();
-		while (line != null) {
-			sb.append(line);
-			line = reader.readLine();
-		}
-
-		String contenuEncode = sb.toString();
+		/*BufferedReader reader = new BufferedReader(new InputStreamReader(
+				response.getEntity().getContent()));*/
+		
+		String content = EntityUtils.toString(response.getEntity());
+		byte[] bytes = content.getBytes("ISO-8859-1");
+		
+		String contenuEncode = new String(bytes, "ISO-8859-1");
 
 		g = Grille.grilleFromServer(contenuEncode);
+		g.setDateRecuperee(new Date());
 
 		return g;
 	}

@@ -16,7 +16,7 @@ public class DefinitionsFragment extends Fragment {
 	public void setArguments(Bundle args) {
 		definitions = args.getStringArray("definitions");
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -39,6 +39,7 @@ public class DefinitionsFragment extends Fragment {
 		for (String def : definitions) {
 			TextView tv = new TextView(getActivity());
 			tv.setText("" + i + ": " + def);
+			tv.setTextSize(16);
 			listeDefinitions.addView(tv);
 			
 			i++;
